@@ -73,8 +73,10 @@ serve(async (req) => {
       activo: perfil?.activo ?? null,
       creado_en: perfil?.created_at ?? null,
       actualizado_en: perfil?.updated_at ?? null,
+      email: authUser?.user?.email ?? null,
       email_auth: authUser?.user?.email ?? null,
       rol: rolNombre,
+      rol_principal: rolNombre ? `${rolNombre.charAt(0).toUpperCase()}${rolNombre.slice(1)}` : null,
     };
 
     return new Response(JSON.stringify(respuesta), {

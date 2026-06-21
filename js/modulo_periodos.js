@@ -46,7 +46,7 @@ async function cargarModuloPeriodos(token) {
 
           <div class="modal-footer">
             <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button class="btn btn-primary" onclick="crearAnio()">Crear</button>
+            <button id="btnCrearAnio" class="btn btn-primary">Crear</button>
           </div>
         </div>
       </div>
@@ -84,12 +84,21 @@ async function cargarModuloPeriodos(token) {
 
           <div class="modal-footer">
             <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button class="btn btn-primary" onclick="crearLapso()">Crear</button>
+            <button id="btnCrearLapso" class="btn btn-primary">Crear</button>
           </div>
         </div>
       </div>
     </div>
   `;
+
+  // Attach handlers to prevent doble envío
+  setTimeout(() => {
+    const btnAnio = document.getElementById('btnCrearAnio');
+    if (btnAnio) btnAnio.addEventListener('click', async () => await runAsyncWithButton(btnAnio, crearAnio, 'Creando...'));
+
+    const btnLapso = document.getElementById('btnCrearLapso');
+    if (btnLapso) btnLapso.addEventListener('click', async () => await runAsyncWithButton(btnLapso, crearLapso, 'Creando...'));
+  }, 50);
 
   cargarAnios();
 }

@@ -147,8 +147,9 @@
   <script src="../../js/services/api.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', async () => {
-      if (!sessionAPI.estaAutenticado()) {
-        window.location.href = '/index.html';
+      const rol = sessionAPI.obtenerRolPrincipal();
+      if (!sessionAPI.estaAutenticado() || rol !== 'Estudiante') {
+        window.location.href = '/index.html?access_denied=1';
         return;
       }
 

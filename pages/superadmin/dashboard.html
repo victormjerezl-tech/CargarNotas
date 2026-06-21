@@ -267,7 +267,7 @@
           <div id="alertaAsignarRol"></div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button type="button" class="btn btn-danger" onclick="guardarAsignacionRol()">Asignar</button>
+            <button id="btnAsignarRol" type="button" class="btn btn-danger">Asignar</button>
           </div>
         </div>
       </div>
@@ -622,6 +622,12 @@
       // Implementar cambio de rol
       alert('Función en desarrollo');
     }
+
+    // Attach button wrapper to prevent doble envío
+    setTimeout(() => {
+      const btn = document.getElementById('btnAsignarRol');
+      if (btn) btn.addEventListener('click', async () => await runAsyncWithButton(btn, guardarAsignacionRol, 'Asignando...'));
+    }, 50);
   </script>
 </body>
 </html>

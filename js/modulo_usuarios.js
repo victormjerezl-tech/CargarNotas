@@ -109,12 +109,24 @@ async function cargarModuloUsuarios(token) {
 
           <div class="modal-footer">
             <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button class="btn btn-primary" onclick="guardarUsuario()">Guardar</button>
+            <button id="btnGuardarUsuario" class="btn btn-primary">Guardar</button>
           </div>
         </div>
       </div>
     </div>
   `;
+
+  // Attach click handler with prevention de doble envío
+  setTimeout(() => {
+    const btn = document.getElementById('btnGuardarUsuario');
+    if (btn) {
+      btn.addEventListener('click', async () => {
+        await runAsyncWithButton(btn, async () => {
+          await guardarUsuario();
+        }, 'Guardando...');
+      });
+    }
+  }, 50);
 
   cargarTablaUsuarios(1);
 }
@@ -147,8 +159,9 @@ async function cargarTablaUsuarios(page = 1) {
     return;
   }
 
-  const usuarios = data.data;
-  const pag = data.pagination;
+  const usuarios = data.items || [];
+  const pag = data.pagination || { page: 1, per_page: 10, total: 0 };
+  const totalPages = Math.max(1, Math.ceil((pag.total || 0) / (pag.per_page || 10)));
 
   let html = `
     <table class="table table-striped table-hover">
@@ -170,15 +183,15 @@ async function cargarTablaUsuarios(page = 1) {
       <tr>
         <td>${u.cedula}</td>
         <td>${u.nombres} ${u.apellidos}</td>
-        <td>${u.email}</td>
+        <td>${u.email || u.email_auth || ''}</td>
         <td>${u.rol}</td>
         <td>${u.activo ? "Activo" : "Inactivo"}</td>
         <td>
           <button class="btn btn-sm btn-warning" onclick="editarUsuario('${u.id}')">Editar</button>
           ${
             u.activo
-              ? `<button class="btn btn-sm btn-danger" onclick="desactivarUsuario('${u.id}')">Desactivar</button>`
-              : `<button class="btn btn-sm btn-success" onclick="activarUsuario('${u.id}')">Activar</button>`
+              ? `<button class="btn btn-sm btn-danger" onclick="toggleUsuarioAction(this, '${u.id}', 'desactivar')">Desactivar</button>`
+              : `<button class="btn btn-sm btn-success" onclick="toggleUsuarioAction(this, '${u.id}', 'activar')">Activar</button>`
           }
         </td>
       </tr>
@@ -193,7 +206,7 @@ async function cargarTablaUsuarios(page = 1) {
       <ul class="pagination">
   `;
 
-  for (let i = 1; i <= pag.pages; i++) {
+  for (let i = 1; i <= totalPages; i++) {
     html += `
       <li class="page-item ${i === pag.page ? "active" : ""}">
         <a class="page-link" onclick="cargarTablaUsuarios(${i})">${i}</a>
@@ -303,4 +316,21 @@ async function activarUsuario(id) {
     headers: { Authorization: `Bearer ${tokenGlobal}` }
   });
   cargarTablaUsuarios(1);
+}
+
+// Helper para desactivar/activar con bloqueo del botón (evita envíos duplicados)
+async function toggleUsuarioAction(btnEl, id, action) {
+  try {
+    setSubmittingButton(btnEl, action === 'desactivar' ? 'Desactivando...' : 'Activando...');
+    if (action === 'desactivar') {
+      await desactivarUsuario(id);
+    } else {
+      await activarUsuario(id);
+    }
+  } catch (err) {
+    console.error('Error en toggleUsuarioAction', err);
+    alert('Error: ' + (err.message || err));
+  } finally {
+    clearSubmittingButton(btnEl);
+  }
 }

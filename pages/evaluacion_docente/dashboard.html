@@ -171,7 +171,7 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button type="button" class="btn btn-primary" onclick="guardarAsignacion()">Asignar</button>
+                <button id="btnAsignarEvaluacion" type="button" class="btn btn-primary">Asignar</button>
           </div>
         </div>
       </div>
@@ -428,6 +428,12 @@
         alert(`Error: ${error.message}`);
       }
     }
+
+    // Attach button to prevent doble envío
+    setTimeout(() => {
+      const btn = document.getElementById('btnAsignarEvaluacion');
+      if (btn) btn.addEventListener('click', async () => await runAsyncWithButton(btn, guardarAsignacion, 'Asignando...'));
+    }, 50);
   </script>
 </body>
 </html>

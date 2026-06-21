@@ -24,32 +24,35 @@ async function abrirEditarEstudiante(id) {
 }
 
 document.getElementById("btnActualizarEstudiante").addEventListener("click", async () => {
+  const btn = document.getElementById("btnActualizarEstudiante");
   if (!validarEditarEstudiante()) return;
 
-  const id = idEstudianteEditar.value;
+  await runAsyncWithButton(btn, async () => {
+    const id = idEstudianteEditar.value;
 
-  const payload = {
-    cedula: cedulaEditar.value.trim(),
-    nombres: nombresEditar.value.trim(),
-    apellidos: apellidosEditar.value.trim(),
-    fecha_nacimiento: fechaNacimientoEditar.value,
-    sexo: sexoEditar.value,
-    telefono: telefonoEditar.value.trim(),
-    direccion: direccionEditar.value.trim(),
-    representante: representanteEditar.value.trim(),
-    telefono_representante: telefonoRepresentanteEditar.value.trim()
-  };
+    const payload = {
+      cedula: cedulaEditar.value.trim(),
+      nombres: nombresEditar.value.trim(),
+      apellidos: apellidosEditar.value.trim(),
+      fecha_nacimiento: fechaNacimientoEditar.value,
+      sexo: sexoEditar.value,
+      telefono: telefonoEditar.value.trim(),
+      direccion: direccionEditar.value.trim(),
+      representante: representanteEditar.value.trim(),
+      telefono_representante: telefonoRepresentanteEditar.value.trim()
+    };
 
-  const { error } = await supabase
-    .from("estudiantes")
-    .update(payload)
-    .eq("id_estudiante", id);
+    const { error } = await supabase
+      .from("estudiantes")
+      .update(payload)
+      .eq("id_estudiante", id);
 
-  if (error) {
-    alert("Error actualizando estudiante: " + error.message);
-    return;
-  }
+    if (error) {
+      alert("Error actualizando estudiante: " + error.message);
+      return;
+    }
 
-  bootstrap.Modal.getInstance("#modalEditarEstudiante").hide();
-  await cargarEstudiantes();
+    bootstrap.Modal.getInstance("#modalEditarEstudiante").hide();
+    await cargarEstudiantes();
+  }, 'Actualizando...');
 });

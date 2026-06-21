@@ -248,11 +248,42 @@
       cargarPerfil();
     });
 
-    function cargarPerfil() {
-      const usuario = sessionAPI.obtenerUsuario();
+    async function cargarPerfil() {
+      const usuarioSesion = sessionAPI.obtenerUsuario();
+      if (!usuarioSesion) {
+        window.location.href = '/index.html';
+        return;
+      }
+
+      let usuario = {
+        nombre: usuarioSesion.nombre || '',
+        apellido: usuarioSesion.apellido || '',
+        cedula: usuarioSesion.cedula || '',
+        email: usuarioSesion.email || '',
+        rol_principal: usuarioSesion.rol_principal || '',
+        user_id: usuarioSesion.user_id || '',
+        timestamp: usuarioSesion.timestamp || Date.now(),
+      };
+
+      try {
+        const response = await usuariosAPI.obtener(usuarioSesion.user_id);
+        if (response && !response.error) {
+          usuario = {
+            nombre: response.nombre ?? response.nombres ?? usuario.nombre,
+            apellido: response.apellido ?? response.apellidos ?? usuario.apellido,
+            cedula: response.cedula ?? usuario.cedula,
+            email: response.email ?? response.email_auth ?? usuario.email,
+            rol_principal: response.rol_principal ?? (response.rol ? `${response.rol.charAt(0).toUpperCase()}${response.rol.slice(1)}` : usuario.rol_principal),
+            user_id: response.user_id ?? response.id ?? usuario.user_id,
+            timestamp: response.creado_en ?? response.timestamp ?? usuario.timestamp,
+          };
+        }
+      } catch (error) {
+        console.warn('No se pudo cargar el perfil desde el backend:', error);
+      }
 
       // Actualizar header
-      document.getElementById('profileName').textContent = 
+      document.getElementById('profileName').textContent =
         `${usuario.nombre} ${usuario.apellido}`.trim() || usuario.email;
       document.getElementById('profileEmail').textContent = usuario.email;
       document.getElementById('profileRol').textContent = `Rol: ${usuario.rol_principal}`;

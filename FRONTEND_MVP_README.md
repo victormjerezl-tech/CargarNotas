@@ -8,7 +8,7 @@
 
 ## 🎯 Descripción General
 
-Frontend completamente funcional para un **Sistema de Gestión Académica Multi-Rol** diseñado para la institución educativa Henry Pittier. El sistema soporta 6 roles con funcionalidades específicas, integración total con Supabase y Edge Functions backend, y una interfaz moderna y responsiva.
+Frontend completamente funcional para un **Sistema de Gestión Académica Multi-Rol** diseñado para la institución educativa Henry Pittier. El sistema soporta 5 roles activos en el frontend (Superadmin, Directivo, Evaluación Docente, Docente y Control de Estudios). El rol Estudiante existe en el proyecto, pero no tiene acceso activo al frontend en esta fase.
 
 ---
 
@@ -64,13 +64,7 @@ Frontend completamente funcional para un **Sistema de Gestión Académica Multi-
   - ✅ Estadísticas académicas
 
 ### 6. **Estudiante** (Color: Azul Claro #17a2b8)
-- **Dashboard:** `/pages/estudiante/dashboard.html`
-- **Funcionalidades:**
-  - ✅ Ver propias notas actuales
-  - ✅ Ver detalles académicos personales
-  - ✅ Historial académico
-  - ✅ Promedio general
-  - ✅ Información de sección
+> Nota: el rol Estudiante está presente en el proyecto, pero no tiene acceso activo al frontend en esta entrega.
 
 ---
 

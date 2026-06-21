@@ -8,7 +8,7 @@
 
 ## 🎯 Objetivo Alcanzado
 
-Se ha completado un **Frontend MVP completamente funcional** para un sistema de gestión académica multi-rol con 6 roles diferenciados (Superadmin, Directivo, Evaluación Docente, Docente, Control de Estudios y Estudiante), totalmente integrado con el backend de Supabase y Edge Functions.
+Se ha completado un **Frontend MVP completamente funcional** para un sistema de gestión académica multi-rol con 5 roles activos en el frontend (Superadmin, Directivo, Evaluación Docente, Docente y Control de Estudios). El rol Estudiante existe en el proyecto, pero no tiene acceso activo al frontend en esta fase.
 
 ---
 

@@ -5,35 +5,45 @@
 // Obtener rol principal del usuario
 async function obtenerRolPrincipal(userId) {
   try {
-    // Intentar obtener el rol desde Supabase
-    const { data, error } = await supabase
+    // 1) Buscar en la tabla user_roles por user_id (esquema real usa `id_rol`)
+    const { data: urData, error: urError } = await supabase
       .from('user_roles')
-      .select('*')
+      .select('id_rol')
       .eq('user_id', userId)
       .limit(1)
       .single();
 
-    if (!error && data) {
-      return {
-        rol_principal: data.role || 'Estudiante',
-        role_id: data.role_id || 6,
-        todos_roles: [data.role] || [],
-      };
+    if (urError || !urData) {
+      return { rol_principal: '', role_id: null, todos_roles: [] };
     }
 
-    // Si no hay rol específico, asignar "Estudiante" por defecto
+    const idRol = urData.id_rol;
+
+    // 2) Obtener el nombre del rol desde la tabla `rol`
+    const { data: rData, error: rError } = await supabase
+      .from('rol')
+      .select('nombre')
+      .eq('id_rol', idRol)
+      .limit(1)
+      .single();
+
+    if (rError || !rData) {
+      return { rol_principal: '', role_id: idRol || null, todos_roles: [] };
+    }
+
+    // 3) Transformar el nombre de la BD a la forma esperada por el frontend
+    //    Ej: 'superadmin' -> 'Superadmin', 'control_estudios' -> 'Control_estudios'
+    const nombreBD = rData.nombre || '';
+    const rolPrincipal = nombreBD ? nombreBD.charAt(0).toUpperCase() + nombreBD.slice(1) : '';
+
     return {
-      rol_principal: 'Estudiante',
-      role_id: 6,
-      todos_roles: ['Estudiante'],
+      rol_principal: rolPrincipal,
+      role_id: idRol || null,
+      todos_roles: nombreBD ? [nombreBD] : [],
     };
   } catch (err) {
     console.warn('No se pudo obtener rol, asignando por defecto:', err);
-    return {
-      rol_principal: 'Estudiante',
-      role_id: 6,
-      todos_roles: ['Estudiante'],
-    };
+    return { rol_principal: '', role_id: null, todos_roles: [] };
   }
 }
 

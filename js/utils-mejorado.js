@@ -35,16 +35,16 @@ function estaAutenticado() {
  */
 function obtenerRolPrincipal() {
   const sesion = obtenerSesionUsuario();
-  return sesion?.rol_principal || "Estudiante";
+  return sesion?.rol_principal || null;
 }
 
 /**
  * Obtiene el ID del rol principal del usuario
- * @returns {Number} ID del rol
+ * @returns {Number|null} ID del rol
  */
 function obtenerRoleId() {
   const sesion = obtenerSesionUsuario();
-  return sesion?.role_id || 6;
+  return sesion?.role_id ?? null;
 }
 
 /**
@@ -371,6 +371,54 @@ function mostrarCargando(mostrar = true, mensaje = "Cargando...") {
     }
   } else {
     if (spinner) spinner.remove();
+  }
+}
+
+// ============================================================================
+// 4.b UTILIDADES DE BLOQUEO / PREVENCIÓN DE DOBLE ENVÍO
+// ============================================================================
+
+/**
+ * Marca un botón como en estado "submitting": lo deshabilita y cambia su texto
+ * @param {HTMLElement|String} btn
+ * @param {String} texto
+ */
+function setSubmittingButton(btn, texto = "Enviando...") {
+  const el = typeof btn === 'string' ? document.getElementById(btn) : btn;
+  if (!el) return;
+  if (!el.dataset._originalHtml) el.dataset._originalHtml = el.innerHTML;
+  el.disabled = true;
+  el.innerHTML = texto;
+  el.classList.add('disabled');
+}
+
+/**
+ * Restaura el estado original del botón
+ * @param {HTMLElement|String} btn
+ */
+function clearSubmittingButton(btn) {
+  const el = typeof btn === 'string' ? document.getElementById(btn) : btn;
+  if (!el) return;
+  el.disabled = false;
+  if (el.dataset._originalHtml) {
+    el.innerHTML = el.dataset._originalHtml;
+    delete el.dataset._originalHtml;
+  }
+  el.classList.remove('disabled');
+}
+
+/**
+ * Ejecuta una función async mientras bloquea un botón para evitar envíos duplicados
+ * @param {HTMLElement|String} btn
+ * @param {Function} asyncFn - función asíncrona a ejecutar
+ * @param {String} textoOpcional - texto mostrado mientras dura la operación
+ */
+async function runAsyncWithButton(btn, asyncFn, textoOpcional = 'Enviando...') {
+  try {
+    setSubmittingButton(btn, textoOpcional);
+    return await asyncFn();
+  } finally {
+    clearSubmittingButton(btn);
   }
 }
 

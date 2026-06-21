@@ -553,10 +553,14 @@ async function guardarNotas() {
     return;
   }
 
-  mostrarCargando(true, "Guardando notas...");
+  // Usar bloqueo de botón para evitar doble envío
+  const btn = document.getElementById('btnGuardarNotas');
 
-  try {
-    const notasAGuardar = [];
+  await runAsyncWithButton(btn, async () => {
+    mostrarCargando(true, "Guardando notas...");
+
+    try {
+      const notasAGuardar = [];
 
     // Recolectar todas las notas
     estadoApp.estudiantesEnSeccion.forEach(est => {
@@ -581,26 +585,27 @@ async function guardarNotas() {
       }
     });
 
-    if (notasAGuardar.length === 0) {
-      mostrarAdvertencia("No hay notas para guardar");
+      if (notasAGuardar.length === 0) {
+        mostrarAdvertencia("No hay notas para guardar");
+        mostrarCargando(false);
+        return;
+      }
+
+      // Guardar usando UPSERT (inserta o actualiza)
+      const { error } = await supabase
+        .from("calificaciones")
+        .upsert(notasAGuardar, { onConflict: "evaluacion_id,estudiante_id" });
+
+      if (error) throw error;
+
+      mostrarExito(`${notasAGuardar.length} notas guardadas exitosamente`, 2000);
       mostrarCargando(false);
-      return;
+    } catch (error) {
+      console.error("Error guardando notas:", error);
+      mostrarError(error.message || "Error al guardar las notas");
+      mostrarCargando(false);
     }
-
-    // Guardar usando UPSERT (inserta o actualiza)
-    const { error } = await supabase
-      .from("calificaciones")
-      .upsert(notasAGuardar, { onConflict: "evaluacion_id,estudiante_id" });
-
-    if (error) throw error;
-
-    mostrarExito(`${notasAGuardar.length} notas guardadas exitosamente`, 2000);
-    mostrarCargando(false);
-  } catch (error) {
-    console.error("Error guardando notas:", error);
-    mostrarError(error.message || "Error al guardar las notas");
-    mostrarCargando(false);
-  }
+  }, 'Guardando...');
 }
 
 // ============================================================================

@@ -7,7 +7,7 @@
 
 ## 📊 RESUMEN EJECUTIVO
 
-Se ha desarrollado un **Frontend MVP completo** para un Sistema de Gestión Académica Multi-Rol que funciona 100% integrado con tu backend de Supabase. El sistema incluye:
+Se ha desarrollado un **Frontend MVP completo** para un Sistema de Gestión Académica Multi-Rol que funciona 100% integrado con tu backend de Supabase. El sistema incluye 5 roles activos en el frontend (Superadmin, Directivo, Evaluación Docente, Docente y Control de Estudios). El rol Estudiante existe en el proyecto, pero no tiene acceso activo al frontend en esta fase.
 
 ✅ **6 Dashboards Diferenciados**  
 ✅ **2 Servicios Centralizados (API + Session)**  
@@ -141,7 +141,7 @@ nav.volverADashboard()
 | 3 | **Evaluación Docente** 🟣 | #6f42c1 | `/pages/evaluacion_docente/dashboard.html` | Asignación docentes, Revisión notas, Modificación notas, Reportes |
 | 4 | **Docente** 🟢 | #28a745 | `/pages/docente/dashboard.html` | Secciones, Carga de notas, Porcentajes evaluación, Historial, Asesorías |
 | 5 | **Control Estudios** 🟠 | #fd7e14 | `/pages/control_estudios/dashboard.html` | Gestión estudiantes, Inscripciones, Secciones, Traslados, Reportes |
-| 6 | **Estudiante** 🔷 | #17a2b8 | `/pages/estudiante/dashboard.html` | Mis notas, Detalles académicos, Historial, Promedio |
+> Nota: el rol Estudiante está presente en el proyecto, pero no tiene acceso activo al frontend en esta entrega.
 
 ---
 

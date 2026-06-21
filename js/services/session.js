@@ -8,6 +8,8 @@ const SESSION_KEYS = {
   USER_ROLE: 'userRole',
 };
 
+const ALLOWED_ROLES = ['Superadmin', 'Directivo', 'Evaluacion_docente', 'Docente', 'Control_estudios'];
+
 const sessionAPI = {
   /**
    * Guardar datos de sesión del usuario
@@ -19,15 +21,19 @@ const sessionAPI = {
       nombre: user.user_metadata?.nombre || '',
       apellido: user.user_metadata?.apellido || '',
       cedula: user.user_metadata?.cedula || '',
-      rol_principal: rolData.rol_principal || 'Estudiante',
-      role_id: rolData.role_id || 6,
+      rol_principal: rolData.rol_principal || null,
+      role_id: rolData.role_id || null,
       todos_roles: rolData.todos_roles || [],
       timestamp: new Date().getTime(),
     };
 
     sessionStorage.setItem(SESSION_KEYS.USER_SESSION, JSON.stringify(sessionData));
     localStorage.setItem(SESSION_KEYS.USER_EMAIL, user.email);
-    localStorage.setItem(SESSION_KEYS.USER_ROLE, rolData.rol_principal || 'Estudiante');
+    if (rolData.rol_principal) {
+      localStorage.setItem(SESSION_KEYS.USER_ROLE, rolData.rol_principal);
+    } else {
+      localStorage.removeItem(SESSION_KEYS.USER_ROLE);
+    }
   },
 
   /**
@@ -55,11 +61,11 @@ const sessionAPI = {
   },
 
   /**
-   * Verificar si usuario está autenticado
+   * Verificar si usuario está autenticado y tiene rol permitido
    */
   estaAutenticado: () => {
     const sesion = sessionAPI.obtenerSesion();
-    return sesion && sesion.user_id ? true : false;
+    return sesion && sesion.user_id && ALLOWED_ROLES.includes(sesion.rol_principal) ? true : false;
   },
 
   /**
@@ -100,7 +106,6 @@ const ROLE_REDIRECTS = {
   'Evaluacion_docente': '/pages/evaluacion_docente/dashboard.html',
   'Docente': '/pages/docente/dashboard.html',
   'Control_estudios': '/pages/control_estudios/dashboard.html',
-  'Estudiante': '/pages/estudiante/dashboard.html',
 };
 
 // ============================================================================
@@ -113,8 +118,8 @@ const nav = {
    */
   redirigirPorRol: () => {
     const rol = sessionAPI.obtenerRolPrincipal();
-    if (!rol) {
-      window.location.href = '/index.html';
+    if (!rol || !ALLOWED_ROLES.includes(rol)) {
+      window.location.href = '/index.html?access_denied=1';
       return;
     }
 
@@ -122,8 +127,7 @@ const nav = {
     if (url) {
       window.location.href = url;
     } else {
-      // Rol desconocido, redirigir a panel estudiante por defecto
-      window.location.href = ROLE_REDIRECTS['Estudiante'];
+      window.location.href = '/index.html?access_denied=1';
     }
   },
 
@@ -131,6 +135,9 @@ const nav = {
    * Ir a un rol específico
    */
   irARol: (rol) => {
+    if (!ALLOWED_ROLES.includes(rol)) {
+      return;
+    }
     const url = ROLE_REDIRECTS[rol];
     if (url) {
       window.location.href = url;
