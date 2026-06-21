@@ -1,0 +1,170 @@
+// ============================================================================
+// SESIÓN Y AUTENTICACIÓN - Session Management
+// ============================================================================
+
+const SESSION_KEYS = {
+  USER_SESSION: 'userSession',
+  USER_EMAIL: 'userEmail',
+  USER_ROLE: 'userRole',
+};
+
+const sessionAPI = {
+  /**
+   * Guardar datos de sesión del usuario
+   */
+  guardarSesion: (user, rolData = {}) => {
+    const sessionData = {
+      user_id: user.id,
+      email: user.email,
+      nombre: user.user_metadata?.nombre || '',
+      apellido: user.user_metadata?.apellido || '',
+      cedula: user.user_metadata?.cedula || '',
+      rol_principal: rolData.rol_principal || 'Estudiante',
+      role_id: rolData.role_id || 6,
+      todos_roles: rolData.todos_roles || [],
+      timestamp: new Date().getTime(),
+    };
+
+    sessionStorage.setItem(SESSION_KEYS.USER_SESSION, JSON.stringify(sessionData));
+    localStorage.setItem(SESSION_KEYS.USER_EMAIL, user.email);
+    localStorage.setItem(SESSION_KEYS.USER_ROLE, rolData.rol_principal || 'Estudiante');
+  },
+
+  /**
+   * Obtener sesión actual
+   */
+  obtenerSesion: () => {
+    const sesion = sessionStorage.getItem(SESSION_KEYS.USER_SESSION);
+    return sesion ? JSON.parse(sesion) : null;
+  },
+
+  /**
+   * Obtener rol principal
+   */
+  obtenerRolPrincipal: () => {
+    const sesion = sessionAPI.obtenerSesion();
+    return sesion?.rol_principal || null;
+  },
+
+  /**
+   * Obtener usuario actual
+   */
+  obtenerUsuario: () => {
+    const sesion = sessionAPI.obtenerSesion();
+    return sesion || null;
+  },
+
+  /**
+   * Verificar si usuario está autenticado
+   */
+  estaAutenticado: () => {
+    const sesion = sessionAPI.obtenerSesion();
+    return sesion && sesion.user_id ? true : false;
+  },
+
+  /**
+   * Limpiar sesión (logout)
+   */
+  limpiarSesion: () => {
+    sessionStorage.removeItem(SESSION_KEYS.USER_SESSION);
+    localStorage.removeItem(SESSION_KEYS.USER_EMAIL);
+    localStorage.removeItem(SESSION_KEYS.USER_ROLE);
+  },
+
+  /**
+   * Verificar si usuario tiene un rol específico
+   */
+  tieneRol: (rol) => {
+    const sesion = sessionAPI.obtenerSesion();
+    if (!sesion) return false;
+    return sesion.rol_principal === rol || sesion.todos_roles?.includes(rol);
+  },
+
+  /**
+   * Obtener información del usuario
+   */
+  obtenerInfo: (campo) => {
+    const sesion = sessionAPI.obtenerSesion();
+    if (!sesion) return null;
+    return campo ? sesion[campo] : sesion;
+  },
+};
+
+// ============================================================================
+// MAPA DE REDIRECCIONES POR ROL
+// ============================================================================
+
+const ROLE_REDIRECTS = {
+  'Superadmin': '/pages/superadmin/dashboard.html',
+  'Directivo': '/pages/directivo/dashboard.html',
+  'Evaluacion_docente': '/pages/evaluacion_docente/dashboard.html',
+  'Docente': '/pages/docente/dashboard.html',
+  'Control_estudios': '/pages/control_estudios/dashboard.html',
+  'Estudiante': '/pages/estudiante/dashboard.html',
+};
+
+// ============================================================================
+// FUNCIONES DE NAVEGACIÓN
+// ============================================================================
+
+const nav = {
+  /**
+   * Redirigir según rol principal del usuario
+   */
+  redirigirPorRol: () => {
+    const rol = sessionAPI.obtenerRolPrincipal();
+    if (!rol) {
+      window.location.href = '/index.html';
+      return;
+    }
+
+    const url = ROLE_REDIRECTS[rol];
+    if (url) {
+      window.location.href = url;
+    } else {
+      // Rol desconocido, redirigir a panel estudiante por defecto
+      window.location.href = ROLE_REDIRECTS['Estudiante'];
+    }
+  },
+
+  /**
+   * Ir a un rol específico
+   */
+  irARol: (rol) => {
+    const url = ROLE_REDIRECTS[rol];
+    if (url) {
+      window.location.href = url;
+    }
+  },
+
+  /**
+   * Logout
+   */
+  logout: async () => {
+    try {
+      await supabase.auth.signOut();
+      sessionAPI.limpiarSesion();
+      window.location.href = '/index.html';
+    } catch (error) {
+      console.error('Error en logout:', error);
+      window.location.href = '/index.html';
+    }
+  },
+
+  /**
+   * Ir a página de perfil
+   */
+  irAPerfil: () => {
+    window.location.href = '/pages/perfil.html';
+  },
+
+  /**
+   * Volver a dashboard principal según rol
+   */
+  volverADashboard: () => {
+    nav.redirigirPorRol();
+  },
+};
+
+window.sessionAPI = sessionAPI;
+window.nav = nav;
